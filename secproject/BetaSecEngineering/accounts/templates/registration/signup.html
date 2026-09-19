@@ -1,0 +1,33 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Create account | BetaSec Engineering{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="single-form-layout">
+    <div class="auth-panel compact-panel">
+        <p class="kicker">Local test identity</p>
+        <h1>Create account</h1>
+        <p class="lede">Use dummy details created only for this lab.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="field-help">{{ field.help_text|safe }}</div>{% endif %}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button class="button button-primary" type="submit">Create account</button>
+        </form>
+        <p class="form-footer">Already registered? <a href="{% url 'login' %}">Return to login</a></p>
+    </div>
+</section>
+{% endblock %}
