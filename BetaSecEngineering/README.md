@@ -75,5 +75,3 @@ python manage.py runserver 127.0.0.1:8000
 Use separate private browser sessions for the two runs to keep dummy sessions
 easy to compare. HTTP intentionally remains available for the demonstration;
 this is a local development setup, not a production deployment.
-
-See `report-guides/04_HTTPS_COMPARISON_GUIDE.txt` for the packet comparison.
