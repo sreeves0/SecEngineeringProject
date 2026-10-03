@@ -1,0 +1,62 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}{{ page_title }} | BetaSec Engineering{% endblock %}
+{% block body_class %}{% if is_vulnerable %}lab-danger{% else %}lab-safe{% endif %}{% endblock %}
+
+{% block content %}
+<section class="lab-layout">
+    <div class="lab-form-panel">
+        <div class="mode-line">
+            <span class="mode-label">{% if is_vulnerable %}Vulnerable lab mode{% else %}Secure comparison mode{% endif %}</span>
+        </div>
+        <h1 class="visually-hidden">{{ page_title }}</h1>
+        <div class="lab-guidance">
+            <strong>{{ mode_summary }}</strong>
+            <span>{{ result_hint }}</span>
+        </div>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="field-group">
+                <label for="{{ form.username.id_for_label }}">Lab username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.password.id_for_label }}">Lab password</label>
+                {{ form.password }}
+                {{ form.password.errors }}
+            </div>
+            <button class="button {% if is_vulnerable %}button-danger{% else %}button-safe{% endif %}" type="submit">
+                Sign in to lab
+            </button>
+        </form>
+
+        <a class="comparison-link" href="{{ comparison_url }}">{{ comparison_label }}</a>
+    </div>
+
+    <aside class="lab-evidence-panel">
+        <div>
+            <p class="panel-label">Dummy Account</p>
+            <dl class="credential-list">
+                <div><dt>Username</dt><dd><code>analyst</code></dd></div>
+                <div><dt>Password</dt><dd><code>secengy124!</code></dd></div>
+            </dl>
+        </div>
+        <div class="payload-card">
+            <p class="panel-label">Bypass test value</p>
+            <code>' OR 1=1 --</code>
+            <p>
+                {% if is_vulnerable %}
+                    This value is expected to open a lab session here.
+                {% else %}
+                    This value should remain rejected in secure mode.
+                {% endif %}
+            </p>
+        </div>
+    </aside>
+</section>
+{% endblock %}

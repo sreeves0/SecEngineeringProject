@@ -1,0 +1,85 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}HTTP and HTTPS Setup | BetaSec Engineering{% endblock %}
+
+{% block content %}
+<article class="guide-layout">
+    <header class="guide-heading">
+        <p class="kicker">Read-only setup guide</p>
+        <h1>Switching between HTTP and HTTPS</h1>
+        <p class="lede">
+            These instructions identify the files and server configuration to change manually.
+            This page cannot enable or disable HTTPS.
+        </p>
+    </header>
+
+    <div class="guide-notice">
+        <strong>Keep both modes local.</strong>
+        Bind the Django backend and any TLS proxy to <code>127.0.0.1</code>. Do not expose the
+        intentionally vulnerable lab to a LAN or the internet.
+    </div>
+
+    <section class="guide-section" aria-labelledby="control-heading">
+        <p class="panel-label">Where to make changes</p>
+        <h2 id="control-heading">Two configurations work together</h2>
+        <dl class="guide-file-list">
+            <div>
+                <dt><code>betasecengineering/settings.py</code></dt>
+                <dd>
+                    <code>DJANGO_SECURE_COOKIES</code> controls the Secure flag on the session and
+                    CSRF cookies. It does not create an HTTPS connection.
+                </dd>
+            </div>
+            <div>
+                <dt>Your local web server configuration</dt>
+                <dd>
+                    <code>serve_https.py</code> provides the loopback-only TLS listener and serves
+                    the application directly. <code>betasecengineering/settings_https.py</code>
+                    enables Secure cookies automatically. No reverse proxy is required.
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="guide-section" aria-labelledby="http-heading">
+        <p class="panel-label">HTTP mode</p>
+        <h2 id="http-heading">Serve Django directly</h2>
+        <ol class="guide-steps">
+            <li>Stop or disable the HTTPS listener in your local web server configuration.</li>
+            <li>Set <code>DJANGO_SECURE_COOKIES=0</code> before starting Django.</li>
+            <li>Run the backend on <code>127.0.0.1:8000</code> and open <code>http://127.0.0.1:8000/</code>.</li>
+        </ol>
+    </section>
+
+    <section class="guide-section" aria-labelledby="https-heading">
+        <p class="panel-label">HTTPS mode</p>
+        <h2 id="https-heading">Run the local TLS launcher</h2>
+        <ol class="guide-steps">
+            <li>From the project directory, run <code>pwsh -File .\create-local-cert.ps1</code> once to create a 30-day self-signed localhost certificate.</li>
+            <li>
+                Run <code>python serve_https.py</code> using your Django Python interpreter,
+                then open <code>https://127.0.0.1:8443/</code>.
+            </li>
+            <li>
+                Expect a browser certificate warning. Proceed only at this exact localhost
+                address with dummy data. Traffic is encrypted, but the self-signed certificate
+                does not provide normal browser trust. No system trust settings are changed.
+            </li>
+            <li>Secure cookies are enabled automatically. Stop with Ctrl+C; restart after code changes.</li>
+        </ol>
+    </section>
+
+    <section class="guide-section" aria-labelledby="verify-heading">
+        <p class="panel-label">Verification</p>
+        <h2 id="verify-heading">Check the account page</h2>
+        <p>
+            Sign in through the main login and open the account page. The transport badge should
+            match HTTP or HTTPS, and the Secure cookie status should match
+            the selected mode. Use only dummy local accounts. This direct TLS launcher does not
+            trust <code>X-Forwarded-Proto: https</code> headers.
+        </p>
+    </section>
+
+    <a class="button button-secondary guide-back" href="{% url 'login' %}">Back to login</a>
+</article>
+{% endblock %}

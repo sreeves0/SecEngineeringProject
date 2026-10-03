@@ -1,0 +1,32 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Lab result | BetaSec Engineering{% endblock %}
+{% block body_class %}{% if lab_mode == 'vulnerable' %}lab-danger{% else %}lab-safe{% endif %}{% endblock %}
+
+{% block content %}
+<section class="result-layout">
+    <div class="result-status">
+        <p class="kicker">Lab authentication result</p>
+        <h1>Access granted</h1>
+        <p class="lede">The lab session was opened in <strong>{{ lab_mode }}</strong> mode.</p>
+    </div>
+
+    <dl class="result-details">
+        <div><dt>Account</dt><dd>{{ lab_account.username }}</dd></div>
+        <div><dt>Display name</dt><dd>{{ lab_account.display_name }}</dd></div>
+        <div><dt>Mode</dt><dd>{{ lab_mode|title }}</dd></div>
+    </dl>
+
+    <div class="action-row">
+        {% if lab_mode == 'vulnerable' %}
+            <a class="button button-safe" href="{% url 'lab-secure-login' %}">Try secure comparison</a>
+        {% else %}
+            <a class="button button-danger" href="{% url 'lab-vulnerable-login' %}">Open vulnerable lab</a>
+        {% endif %}
+        <form method="post" action="{% url 'lab-logout' %}">
+            {% csrf_token %}
+            <button class="button button-secondary" type="submit">End lab session</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

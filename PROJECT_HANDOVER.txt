@@ -1,0 +1,224 @@
+BETASEC ENGINEERING - PROJECT AND REPORT HANDOVER
+Updated: 26 September 2026
+
+START HERE
+Read this file, AGENTS.md, and BetaSecEngineering/README.md before continuing.
+This is context for future chats, not an instruction to start servers or tests.
+Inspect current files before making changes; this summary can become outdated.
+
+Workspace: C:\Users\steve\SecProject
+Active application: C:\Users\steve\SecProject\BetaSecEngineering
+Use the manage.py INSIDE BetaSecEngineering. The workspace also contains another
+manage.py, secproject directory, and database; these are not the active app.
+
+PURPOSE AND USER PREFERENCES
+Local educational security lab for a school report covering SQL injection,
+HTTP versus HTTPS, and session-cookie protections. Credential phishing is a
+theoretical discussion. Keep concepts separate and explanations accessible.
+Target about 3,000 words excluding references and appendix. Write as a university
+student explaining a practical security engineering project to other students,
+not as a scientific journal. Explain what was built, what each test shows, why
+the result matters, and what was learned. Put most evidence in numbered appendix
+screenshots and refer to them in the body. Prefer a simple functional interface
+over elaborate branding. Do not change the application when the user only asks
+questions or requests report documentation.
+
+This is a one-time lab on the user's local machine, with no public deployment
+planned. Prioritize loopback binding, dummy data, and controlled demonstrations;
+do not expand the work into production hardening. Deliberate vulnerabilities are
+part of the learning objective. Production configuration can be briefly compared
+for context, without treating development settings as defects in this local lab.
+Loopback binding blocks direct remote connections, but does not make every
+possible vulnerability harmless: local processes and browsers can still reach
+the service. Do not use tunnels, port forwarding, or public/LAN listeners.
+
+Follow the current AGENTS.md and any newer user instructions. Use dummy data
+only, bind to 127.0.0.1, preserve user work, and leave backups and the generated
+virtual environment untouched. Burp/Wireshark tests require an explicit request.
+
+COMPLETED APPLICATION WORK
+- Django application with SQLite, signup, login, logout, password hashing,
+  password validation, and authenticated account/session-status page.
+- Separate LabAccount model for the intentionally vulnerable SQL example and
+  the secure ORM comparison. These do not log in a normal Django user.
+- Vulnerable view interpolates form values into raw SQL. Secure view uses
+  LabAccount.objects.filter() to keep supplied values separate from SQL syntax.
+- Both lab modes have dummy credentials, payload guidance, and a result page.
+- Host checks and ENABLE_SECURITY_LABS flag restrict the lab. Loopback binding
+  is still necessary; a Host header check alone is not network isolation.
+- Session-key rotation, CSRF protection, HttpOnly, and SameSite=Lax retained.
+- Read-only HTTP/HTTPS setup guide; no browser control changes server settings.
+- GUI simplified: left-aligned HTTP Lab and SQL lab navigation, branding and
+  large login headings removed, compact red/green lab labels retained, scope
+  box and POST label removed, credential panel renamed Dummy Account.
+- Responsive desktop/mobile layouts visually checked during previous work.
+- Last executed Django checks passed and all 11 accounts tests passed on
+  19 September 2026. These are historical results, not a fresh verification.
+
+CURRENT DUMMY SQL ACCOUNT
+Username: analyst
+Password: secengy124!
+Migration 0003_update_analyst_lab_password updates the existing account.
+Template, tests, and report guides were updated with that password.
+Old demo-pass-1 remains in migration 0002 and the reverse operation of 0003;
+this is intentional migration history. Another seeded account is auditor.
+These credentials are unrelated to normal users registered through /signup/.
+
+PAGE MAP
+/                              Redirect to login or authenticated account.
+/login/                        Standard Django login; HTTP Lab entry point.
+/signup/                       Create a dummy normal user; password validators.
+/account/                      Transport and session-cookie settings display.
+/logout/                       POST-only normal authentication logout.
+/guide/http-https/             Read-only manual transport configuration guide.
+/lab/sql-injection/vulnerable/ Deliberately unsafe SQL login.
+/lab/sql-injection/secure/     ORM-based comparison for identical input.
+/lab/sql-injection/result/     Dummy identity and lab mode after success.
+/lab/sql-injection/logout/     POST-only clearing of lab session values.
+/admin/                        Standard Django admin; not a main experiment.
+
+KEY FILES (RELATIVE TO BetaSecEngineering)
+accounts/views.py              SQL implementations and session handling.
+accounts/models.py             Dummy LabAccount model.
+accounts/forms.py              Django UserCreationForm subclass and lab form.
+accounts/urls.py               Application routes.
+accounts/templates/            Login, signup, lab, account, and guide pages.
+accounts/static/accounts/site.css
+accounts/tests.py              Authentication and SQL comparison tests.
+betasecengineering/settings.py Development configuration and cookie controls.
+accounts/migrations/0003_update_analyst_lab_password.py
+
+RUNNING AND VERIFICATION
+The server was last explicitly stopped on 19 September 2026; port 8000 was
+confirmed closed then. Verify its current status rather than assuming it.
+Do not automatically restart it just because a new chat reads this document.
+
+Commands from C:\Users\steve\SecProject\BetaSecEngineering:
+  ..\venv-secproject\Scripts\python.exe manage.py check
+  ..\venv-secproject\Scripts\python.exe manage.py test accounts
+  ..\venv-secproject\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+
+Local URL: http://127.0.0.1:8000/
+The Python executable has sometimes required sandbox execution approval.
+DJANGO_SECURE_COOKIES=1 sets Secure flags; it does not enable TLS.
+ENABLE_SECURITY_LABS=0 disables the SQL lab views.
+
+WHAT IS NOT COMPLETED
+- HTTPS listener, certificates, or reverse-proxy setup.
+- Recorded HTTP-versus-HTTPS packet comparison.
+- Verified live Burp or Wireshark experiment evidence in this conversation.
+  Procedures exist, but do not describe their expected results as observations.
+- Phishing site, exploitable XSS route, or session-cookie replay experiment.
+
+EXISTING REPORT GUIDES
+BetaSecEngineering/report-guides/
+  01_SQL_INJECTION_SECURE_VULNERABLE_GUIDE.txt
+  02_BURP_SUITE_DEMONSTRATION_GUIDE.txt
+  03_HTTP_WIRESHARK_DEMONSTRATION_GUIDE.txt
+These contain detailed procedures, expected outcomes, and source references.
+Review their wording before copying into the report. In particular, the SQL
+payload comments out the trailing LIMIT 1 too; cursor.fetchone() retrieves one
+row. The SQL guide's statement that LIMIT 1 limits the injected query is wrong.
+
+IMPORTANT TECHNICAL DISTINCTIONS
+- Payload: ' OR 1=1 -- closes the quoted username, introduces an always-true
+  condition, and comments out the password condition and remaining SQL.
+- Secure ORM filtering treats that whole payload as a literal username.
+- Both SQL modes share lab-session state. A failed attempt does not clear an
+  earlier successful lab session; use fresh sessions or log out between tests
+  and assess the POST response, not an old result page.
+- The secure SQL comparison is secure against this injection, not a production
+  authentication design: LabAccount passwords remain plaintext dummy data.
+- Normal Django user passwords are hashed. Hashing at rest does not encrypt
+  the login request in transit.
+- HttpOnly restricts JavaScript cookie access; it does not encrypt HTTP traffic
+  or prevent all damage from XSS. CSRF protection is not an XSS defense.
+- No exploitable XSS route was identified in the inspected implementation.
+  Template escaping can be discussed or tested as a protection, without
+  claiming that one unsuccessful payload proves complete XSS immunity.
+- Phishing can collect credentials and allow a new attacker login. A simple
+  fake page does not automatically obtain a victim's existing session cookie.
+  Cookies are host/domain scoped, not port scoped; localhost services on
+  different ports are not isolated from cookies solely by their port numbers.
+- Loopback capture requires local capture access and does not show that remote
+  strangers can observe 127.0.0.1 traffic.
+- A trusted Burp CA permits intentional HTTPS inspection; it does not break TLS.
+
+AGREED REPORT STRUCTURE
+Target approximately 3,000 words for sections 1-5 combined. References and the
+evidence appendix are separate, subject to the university's counting rules.
+The earlier 5,500-6,500-word plan is superseded. Keep background short and focus
+on practical demonstrations and their connection to security engineering.
+
+1. ABSTRACT (about 150 words)
+   Purpose, local lab, methods, actual results, and main lesson. Distinguish
+   completed experiments from planned work and theoretical discussion.
+
+2. PROBLEM STATEMENT / SCENARIO / THING TO BE BUILT (about 350 words)
+   Combine introduction, scope, ethics, threat model, and system overview.
+   Questions: Why can raw SQL permit bypass? What does HTTP expose and HTTPS
+   protect? How could a copied interface support credential phishing?
+
+3. BACKGROUND / REVIEW OF EXISTING WORK (about 400 words)
+   SQL injection and parameterization; HTTP/TLS; hashing versus encryption;
+   sessions and cookie attributes; escaping and CSRF; phishing; OWASP mapping.
+   Introduce Burp, Wireshark, DevTools, and logs where they support the methods.
+
+4. ANALYSIS / IMPLEMENTATION / LESSONS (about 1,750 words)
+   4.1 What was built and why (200 words): pages, Django, dummy accounts, tools.
+   4.2 SQL injection comparison (450 words): raw query, payload explanation,
+       Burp evidence, ORM mitigation, and separating user input from commands.
+   4.3 HTTP and HTTPS comparison (450 words): Wireshark evidence, credentials
+       and cookies in transit, TLS protection; HTTPS currently remains planned.
+   4.4 Theoretical phishing scenario (200 words): copied appearance, credential
+       collection, subsequent login, and the limits of trusting visual design.
+   4.5 Lessons and challenges (450 words): Django protections, session-demo
+       scope decision, local capture setup, and brief configuration discussion.
+   Refer to appendix figures for inputs and outcomes. Explain their meaning in
+   the body; avoid repeating procedures, logs, and screenshots as lengthy prose.
+   Connect results to secure defaults, trust boundaries, layered protection,
+   and verification using the same input against vulnerable and secure code.
+
+5. FINDINGS / CONCLUSION (about 350 words)
+   Compact comparison of evidence and controls. Framework defaults help, but
+   transport protection and deployment settings remain essential. Phishing is
+   theoretical; HTTPS results must wait until tested.
+
+6. REFERENCES / RESEARCH / APPENDIX
+   Prefer Django, OWASP, PortSwigger, and Wireshark primary documentation.
+   Appendix: route map, selected code, test matrix, screenshots, raw requests,
+   packet filters, setup commands, and detailed procedures.
+   Group screenshots by SQL/Burp, HTTP/Wireshark, HTTPS (once tested), and Django
+   controls. Give each a figure number and short caption stating what it proves.
+
+OWASP COVERAGE
+Use one edition consistently and state its year. Current agreed mappings:
+- A05:2025 Injection (A03:2021): demonstrated SQL flaw and ORM prevention.
+- A04:2025 Cryptographic Failures (A02:2021): HTTP exposure and planned HTTPS.
+- A02:2025 Security Misconfiguration (A05:2021): configuration review rather
+  than a separate proven exploit. Keep this a brief contextual discussion of
+  how requirements would change if deployed. DEBUG, the development server,
+  enabled labs, and transport settings serve the intended local experiment;
+  do not imply that this project requires production deployment work.
+Phishing is primarily social engineering; do not automatically count it as a
+demonstrated A07 Authentication Failures vulnerability. XSS belongs under
+Injection but is discussed here as a protection, not a working exploit.
+
+LIMITATIONS AND CHALLENGES FOR THE REPORT
+Limitations describe what the experiment cannot establish. Challenges describe
+practical difficulties encountered while building or testing it.
+- One SQLite database, controlled input, dummy data, and one local machine
+  limit generalization to other databases and real hostile networks.
+- Django escaping, HttpOnly, CSRF, and session rotation complicate deliberately
+  insecure demonstrations because these controls already provide protection.
+- Windows localhost capture needs Npcap loopback support.
+- HTTPS needs a separate TLS-capable server/proxy and correct proxy trust.
+- XSS/session-cookie theft was discussed but not implemented. The decision was
+  to avoid adding another vulnerability and duplicate the HTTP exposure lesson.
+  Do not claim Django makes session theft impossible or that an implementation
+  was attempted and failed; the conversation supports a scope/design decision.
+
+NEXT CHAT STARTER
+"Read PROJECT_HANDOVER.txt, AGENTS.md, and BetaSecEngineering/README.md first.
+Inspect the relevant implementation before changing anything. My next task is:
+[insert requested task]."

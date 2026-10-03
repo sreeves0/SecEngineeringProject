@@ -1,0 +1,44 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Login | BetaSec Engineering{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<section class="auth-layout auth-layout-single">
+    <div class="auth-panel">
+        <h1 class="visually-hidden">HTTP lab login</h1>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="field-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+                {{ form.password.errors }}
+            </div>
+
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="button button-primary" type="submit">Sign in</button>
+        </form>
+
+        <p class="form-footer">No local account? <a href="{% url 'signup' %}">Create one</a></p>
+        <div class="transport-guide-link">
+            <p class="panel-label">HTTP and HTTPS setup</p>
+            <a href="{% url 'transport-guide' %}">Read the manual server setup guide</a>
+            <p>Reference instructions only. The guide does not change server settings.</p>
+        </div>
+        <div class="lab-shortcuts">
+            <a href="{% url 'lab-vulnerable-login' %}">Vulnerable SQL lab</a>
+            <a href="{% url 'lab-secure-login' %}">Secure comparison</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
